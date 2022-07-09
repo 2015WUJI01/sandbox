@@ -22,17 +22,35 @@ func init() {
 }
 
 func main() {
+	orm.Debug = true
 	_ = orm.RegisterDriver("mysql", orm.DRMySQL)
 	_ = orm.RegisterDataBase("default", "mysql", "root:@/test?charset=utf8mb4")
 
-	o := orm.NewOrm()
-	p, _ := o.Raw("INSERT INTO `test`.`beego_multi_insert` (`name`, `content`) VALUES (?, ?)").Prepare()
-	data := Data{Name: "test", Content: "abcdefghijklmnopqrstuvwxyz"}
+	sqldb, _ := orm.GetDB()
 	start := time.Now()
-	for i := 0; i < 1e5; i++ {
-		// _, _ = o.Raw("INSERT INTO `beego_multi_insert` (`name`, `content`) VALUES (?, ?)", data.Name, data.Content).Exec()
-		_, _ = p.Exec(data.Name, data.Content)
+	for i := 0; i < 1; i++ {
+		// query, data := ten()
+		// _, _ = o.Raw(query, data...).Exec()
+		res, err := sqldb.Exec("INSERT INTO `beego_multi_insert` (`name`, `content`) VALUES (?, ?);"+
+			"INSERT INTO `beego_multi_insert` (`name`, `content`) VALUES (?, ?);",
+			"asdf", "asdfas", "adfafd", "asdfasf",
+		)
+		if err != nil {
+			fmt.Println(err)
+		} else {
+			rows, _ := res.RowsAffected()
+			fmt.Println("success:", rows)
+		}
 	}
 	cost := time.Now().Sub(start)
 	fmt.Println(cost)
+}
+
+func ten() (query string, data []interface{}) {
+	d := Data{Name: "test", Content: "abcdefghijklmnopqrstuvwxyz"}
+	for i := 0; i < 10; i++ {
+		query += "INSERT INTO `beego_multi_insert` (`name`, `content`) VALUES (?, ?);"
+		data = append(data, d.Name, d.Content)
+	}
+	return
 }
