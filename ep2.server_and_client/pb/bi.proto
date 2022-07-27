@@ -1,0 +1,34 @@
+syntax = "proto3";
+package tracking;
+import "google/protobuf/timestamp.proto";
+
+option go_package = "tracking/pb";
+
+service TrackingServer {
+    rpc AddIncomingRecord(IncomingRecord) returns (Response) {}
+    rpc AddOutgoingRecord(OutgoingRecord) returns (Response) {}
+    rpc AddPagevisitRecord(PagevisitRecord) returns (Response) {}
+}
+
+message IncomingRecord {
+    int64 id                             = 1;
+    google.protobuf.Timestamp visit_time = 2;
+    string ip                            = 3;
+    string http_referer                  = 4;
+    string http_user_agent               = 5;
+    string request_uri                   = 6;
+    int32 traffic_type                   = 7;
+    string retention_user_id             = 8;
+    string source                        = 9;
+    string source_group                  = 10;
+    string country                       = 11;
+    string ref_keyword                   = 12;
+    string server_id                     = 13;
+    string curr_server_id                = 14;
+}
+message OutgoingRecord {
+}
+message PagevisitRecord {
+}
+message Response {
+}
