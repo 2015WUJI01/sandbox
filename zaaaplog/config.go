@@ -13,10 +13,19 @@ type Config struct {
 	ConsoleSeparator string
 	Caller           string // fullpath | file | none
 	EncodeLevel      string
-	LevelBrief       bool
-	LevelCapital     bool
-	LevelColorful    bool
-	ColorMap         ColorMap
+
+	LogLevel struct {
+		Brief    bool
+		Capital  bool
+		Colorful bool
+	}
+	LevelBrief    bool
+	LevelCapital  bool
+	LevelColorful bool
+
+	LevelColor                       LevelColor
+	levelToBriefLowercaseColorString map[Level]string
+	levelToBriefCapitalColorString   map[Level]string
 }
 
 func (c Config) core() zapcore.Core {
@@ -51,14 +60,61 @@ func (c Config) core() zapcore.Core {
 		cfg.ConsoleSeparator = c.ConsoleSeparator
 	}
 
+	levelColorMap := DefaultColorMap()
+	if c.LevelColor.Debug == nil {
+		c.LevelColor.Debug = levelColorMap[DebugLevel]
+	}
+	if c.LevelColor.Info == nil {
+		c.LevelColor.Info = levelColorMap[InfoLevel]
+	}
+	if c.LevelColor.Warn == nil {
+		c.LevelColor.Warn = levelColorMap[WarnLevel]
+	}
+	if c.LevelColor.Error == nil {
+		c.LevelColor.Error = levelColorMap[ErrorLevel]
+	}
+	if c.LevelColor.Panic == nil {
+		c.LevelColor.Panic = levelColorMap[PanicLevel]
+	}
+	if c.LevelColor.DPanic == nil {
+		c.LevelColor.DPanic = levelColorMap[DPanicLevel]
+	}
+	if c.LevelColor.Fatal == nil {
+		c.LevelColor.Fatal = levelColorMap[FatalLevel]
+	}
+
+	c.levelToBriefLowercaseColorString = func() map[Level]string {
+		levelstring := make(map[Level]string, 7)
+		levelstring[DebugLevel] = c.LevelColor.Debug.SetForeground("[" + DebugLevel.String()[0:1] + "]")
+		levelstring[InfoLevel] = c.LevelColor.Info.SetForeground("[" + InfoLevel.String()[0:1] + "]")
+		levelstring[WarnLevel] = c.LevelColor.Warn.SetForeground("[" + WarnLevel.String()[0:1] + "]")
+		levelstring[ErrorLevel] = c.LevelColor.Error.SetForeground("[" + ErrorLevel.String()[0:1] + "]")
+		levelstring[PanicLevel] = c.LevelColor.Panic.SetForeground("[" + PanicLevel.String()[0:1] + "]")
+		levelstring[DPanicLevel] = c.LevelColor.DPanic.SetForeground("[" + DPanicLevel.String()[0:1] + "]")
+		levelstring[FatalLevel] = c.LevelColor.Fatal.SetForeground("[" + FatalLevel.String()[0:1] + "]")
+		return levelstring
+	}()
+
+	c.levelToBriefCapitalColorString = func() map[Level]string {
+		levelstring := make(map[Level]string, 7)
+		levelstring[DebugLevel] = c.LevelColor.Debug.SetForeground("[" + DebugLevel.CapitalString()[0:1] + "]")
+		levelstring[InfoLevel] = c.LevelColor.Info.SetForeground("[" + InfoLevel.CapitalString()[0:1] + "]")
+		levelstring[WarnLevel] = c.LevelColor.Warn.SetForeground("[" + WarnLevel.CapitalString()[0:1] + "]")
+		levelstring[ErrorLevel] = c.LevelColor.Error.SetForeground("[" + ErrorLevel.CapitalString()[0:1] + "]")
+		levelstring[PanicLevel] = c.LevelColor.Panic.SetForeground("[" + PanicLevel.CapitalString()[0:1] + "]")
+		levelstring[DPanicLevel] = c.LevelColor.DPanic.SetForeground("[" + DPanicLevel.CapitalString()[0:1] + "]")
+		levelstring[FatalLevel] = c.LevelColor.Fatal.SetForeground("[" + FatalLevel.CapitalString()[0:1] + "]")
+		return levelstring
+	}()
+
 	switch {
 	case c.LevelBrief && c.LevelCapital && c.LevelColorful:
 		cfg.EncodeLevel = func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString(c.ColorMap._levelToShortCapitalColorString[l])
+			enc.AppendString(c.levelToBriefCapitalColorString[l])
 		}
 	case c.LevelBrief && !c.LevelCapital && c.LevelColorful:
 		cfg.EncodeLevel = func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {
-			enc.AppendString(_levelToShortLowercaseColorString[l])
+			enc.AppendString(c.levelToBriefLowercaseColorString[l])
 		}
 	case c.LevelBrief && c.LevelCapital && !c.LevelColorful:
 		cfg.EncodeLevel = func(l zapcore.Level, enc zapcore.PrimitiveArrayEncoder) {

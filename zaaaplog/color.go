@@ -131,7 +131,7 @@ func DefaultColorMap() map[Level]Color {
 	}
 }
 
-type ColorMap struct {
+type LevelColor struct {
 	Debug  Color
 	Info   Color
 	Warn   Color
@@ -139,7 +139,4 @@ type ColorMap struct {
 	DPanic Color
 	Panic  Color
 	Fatal  Color
-
-	levelToShortLowercaseColorString map[Level]string
-	levelToShortCapitalColorString   map[Level]string
 }

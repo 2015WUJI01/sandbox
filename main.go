@@ -3,20 +3,58 @@ package main
 import (
 	log "main/zaaaplog"
 	"os"
+	"time"
 )
 
 func main() {
 
 	log.ResetLogger(log.NewLogger(log.Config{
-		Style:         "console",
-		WriteSyncer:   os.Stdout,
-		Level:         log.DebugLevel,
-		LevelColorful: true,
-		LevelCapital:  true,
-		LevelBrief:    true,
+
+		// print style and output path
+		Style:       "console",
+		WriteSyncer: os.Stdout,
+
+		// min logging level
+		Level: log.DebugLevel,
+
+		// logging formatter
+
+		// Separator format
+		Separator: " ", // only useful in console style
+
+		// time format
+		TimeFormat: func(t time.Time) string {
+			return ""
+		},
+
+		// level format
+		LevelFormat: func(l log.Level, c log.Color) string {
+			return ""
+		},
+
+		// colorful
+		LevelColor: log.LevelColor{
+			Info:   log.BrightBlue,
+			Warn:   log.YellowANSI,
+			Error:  log.RedANSI,
+			DPanic: log.RedANSI,
+			Panic:  log.RedANSI,
+			Fatal:  log.RedANSI,
+		},
 	}))
 
-	log.Debug("asdfasd")
+	log.Debug("debug")
+	log.Info("info")
+	log.Warn("warn")
+	log.Error("error")
+	log.DPanic("dpanic")
+	func() {
+		defer func() {
+			recover()
+		}()
+		log.Panic("panic")
+	}()
+	log.Fatal("fatal")
 }
 
 //
