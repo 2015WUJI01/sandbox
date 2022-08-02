@@ -2,11 +2,11 @@ syntax = "proto3";
 package user;
 option go_package = "main/user";
 message User {
-  string name = 1;
-  int32 age = 2;
-  string phone = 3;
+    string name  = 1;
+    int32 age    = 2;
+    string phone = 3;
 }
 
 message Group {
-  repeated User user = 1;
+    repeated User user = 1;
 }
