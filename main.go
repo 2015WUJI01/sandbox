@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-const limit = 100
+const limit = 5
 const skip = 0
 
 type _ProductInfoList []string
@@ -37,27 +37,27 @@ type T struct {
 		Id struct {
 			Oid string `json:"$oid"`
 		} `json:"_id"`
-		Brand         string           `json:"brand"`
-		Category      string           `json:"category"`
-		Condition     string           `json:"condition"`
-		CouponCode    string           `json:"coupon_code"`
-		CreatedAt     string           `json:"created_at"`
-		Currency      string           `json:"currency"`
-		CurrentPrice  interface{}      `json:"current_price"`
-		Description   string           `json:"description"`
-		Discount      interface{}      `json:"discount"`
-		Image         interface{}      `json:"image"`
-		Keyword       string           `json:"keyword"`
-		OutOfStock    interface{}      `json:"out_of_stock"`
-		Platform      string           `json:"platform"`
-		PreviousPrice interface{}      `json:"previous_price"`
-		ProductId     string           `json:"product_id"`
-		ProductInfo   *json.RawMessage `json:"product_info"`
-		ProductLink   string           `json:"product_link"`
-		Stars         interface{}      `json:"stars"`
-		SubCategory   string           `json:"sub_category"`
-		Title         string           `json:"title"`
-		UpdatedAt     string           `json:"updated_at"`
+		Brand         string      `json:"brand"`
+		Category      string      `json:"category"`
+		Condition     string      `json:"condition"`
+		CouponCode    string      `json:"coupon_code"`
+		CreatedAt     string      `json:"created_at"`
+		Currency      string      `json:"currency"`
+		CurrentPrice  interface{} `json:"current_price"`
+		Description   string      `json:"description"`
+		Discount      interface{} `json:"discount"`
+		Image         interface{} `json:"image"`
+		Keyword       string      `json:"keyword"`
+		OutOfStock    interface{} `json:"out_of_stock"`
+		Platform      string      `json:"platform"`
+		PreviousPrice interface{} `json:"previous_price"`
+		ProductId     string      `json:"product_id"`
+		ProductInfo   interface{} `json:"product_info"`
+		ProductLink   string      `json:"product_link"`
+		Stars         interface{} `json:"stars"`
+		SubCategory   string      `json:"sub_category"`
+		Title         string      `json:"title"`
+		UpdatedAt     string      `json:"updated_at"`
 	} `json:"datas"`
 	DocsCount int         `json:"docs_count"`
 	EndTime   interface{} `json:"end_time"`
@@ -86,36 +86,25 @@ func main() {
 	}
 
 	for _, data := range t.Datas {
-		var bytes []byte
-		if bytes, err = data.ProductInfo.MarshalJSON(); err != nil {
-			log.Printf("err: %s", err)
-			panic(err)
+		switch data.ProductInfo.(type) {
+		case _ProductInfoList:
+			log.Printf("list")
+		case _ProductInfoTitle:
+			log.Printf("list")
+		case _ProductInfoName:
+			log.Printf("name")
+		case []string:
+			log.Printf("[]string")
+		case [][][]interface{}:
+			log.Printf("[][][]interface{}")
+		case []map[string]string:
+			log.Printf("[]map[string]string")
+		case string:
+			log.Printf("string")
+		default:
+			log.Printf("unknown")
 		}
-
-		var list _ProductInfoList
-		var title _ProductInfoTitle
-		var name _ProductInfoName
-		if err = json.Unmarshal(bytes, &list); err == nil {
-			log.Printf("list: %+v", list)
-			continue
-		} else if err = json.Unmarshal(bytes, &title); err == nil {
-			var titles []__Title
-
-			for _, v := range title {
-				for _, vv := range v {
-					for _, vvv := range vv {
-						titles = append(titles, vvv)
-					}
-				}
-			}
-
-			log.Printf("title(%d): %+v", len(titles), title)
-			continue
-		} else if err = json.Unmarshal(bytes, &name); err == nil {
-			log.Printf("name: %+v", name)
-			continue
-		}
-		log.Printf("unknown: %s", string(bytes))
+		fmt.Println()
 	}
 
 }
