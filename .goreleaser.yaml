@@ -54,7 +54,6 @@ builds:
     goos:
       - android
     goarch:
-      - arm
       - arm64
     mod_timestamp: "{{ .CommitTimestamp }}"
     flags:
