@@ -1,0 +1,97 @@
+before:
+  hooks:
+    - go mod tidy
+builds:
+  - id: linux
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - linux
+    goarch:
+      - '386'
+      - amd64
+      - arm
+      - arm64
+    goarm:
+      - '7'
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+  - id: darwin
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+  - id: win
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - windows
+    goarch:
+      - amd64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+  - id: android
+    env:
+      - CGO_ENABLED=0
+      - GO111MODULE=on
+    goos:
+      - android
+    goarch:
+      - arm
+      - arm64
+    mod_timestamp: "{{ .CommitTimestamp }}"
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w
+
+archives:
+  - id: win
+    builds:
+      - win
+    format: zip
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - README.md
+      - resources/*
+  - id: linux
+    builds:
+      - linux
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - README.md
+      - resources/*
+  - id: darwin
+    builds:
+      - darwin
+    format: zip
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - README.md
+      - resources/*
+  - id: android
+    builds:
+      - android
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    files:
+      - README.md
+      - resources/*
